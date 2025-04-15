@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passaporti Digitali NFT</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <meta name="theme-color" content="#0073e6">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    h1 { text-align: center; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 10px 0; }
+    a.button {
+      display: inline-block;
+      background: #0073e6;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    a.button:hover { background: #005bb5; }
+    #install-button {
+      margin-top: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Passaporti Digitali NFT</h1>
+    <ul>
+      <li><a href="passaporto-nft-qr.html" class="button">📷 Scansiona QR Code</a></li>
+    </ul>
+    <div style="text-align: center;">
+      <button id="install-button">📲 Installa App</button>
+    </div>
+  </div>
+
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-button');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('App installata');
+        } else {
+          console.log('Installazione annullata');
+        }
+        deferredPrompt = null;
+      });
+    });
+  </script>
+</body>
+</html>

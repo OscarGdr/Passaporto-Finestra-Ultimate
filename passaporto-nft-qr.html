@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passaporto Digitale NFT - QR Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: #ffffff; padding: 20px; border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    .section { margin-top: 30px; }
+    .image { text-align: center; margin-bottom: 20px; }
+    .image img { max-width: 100%; height: auto; border-radius: 8px; }
+    .link { text-align: center; margin-top: 20px; }
+    .link a { font-size: 16px; color: #0073e6; text-decoration: none; }
+    .link a:hover { text-decoration: underline; }
+    #reader { width: 100%; margin-top: 20px; }
+    #scan-button {
+      background: #0073e6; color: white; border: none; padding: 10px 20px; font-size: 16px;
+      border-radius: 5px; cursor: pointer;
+    }
+    ul { padding: 0; list-style: none; }
+    li {
+      margin-bottom: 10px; background: #f1f1f1; padding: 10px;
+      border-radius: 5px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .btn-remove {
+      background: red; color: white; border: none; padding: 5px 10px; font-size: 14px;
+      border-radius: 4px; cursor: pointer;
+    }
+    .empty-message {
+      color: #777;
+      font-style: italic;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Passaporto Digitale del Prodotto</h1>
+    <div style="text-align:center;">
+      <button id="scan-button" onclick="startScan()">📷 Scansiona QR Code</button>
+      <div id="reader" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <h2>I tuoi passaporti</h2>
+      <ul id="my-passaports"></ul>
+      <p id="empty-msg" class="empty-message">Non hai ancora scansionato alcun passaporto.</p>
+    </div>
+  </div>
+
+  <script>
+    function startScan() {
+      document.getElementById("reader").style.display = "block";
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          addPassaporto(decodedText);
+          html5QrCode.stop();
+          document.getElementById("reader").style.display = "none";
+        },
+        (errorMessage) => {
+          console.warn(errorMessage);
+        }
+      ).catch(err => {
+        console.error("Errore nell'avvio dello scanner", err);
+      });
+    }
+
+    function addPassaporto(url) {
+      let passaporti = JSON.parse(localStorage.getItem("passaporti") || "[]");
+      if (!passaporti.includes(url)) {
+        passaporti.push(url);
+        localStorage.setItem("passaporti", JSON.stringify(passaporti));
+      }
+      renderPassaporti();
+    }
+
+    function removePassaporto(index) {
+      let passaporti = JSON.parse(localStorage.getItem("passaporti") || "[]");
+      passaporti.splice(index, 1);
+      localStorage.setItem("passaporti", JSON.stringify(passaporti));
+      renderPassaporti();
+    }
+
+    function renderPassaporti() {
+      const list = document.getElementById("my-passaports");
+      const msg = document.getElementById("empty-msg");
+      list.innerHTML = "";
+      const passaporti = JSON.parse(localStorage.getItem("passaporti") || "[]");
+      if (passaporti.length === 0) {
+        msg.style.display = "block";
+      } else {
+        msg.style.display = "none";
+        passaporti.forEach((link, index) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${link}" target="_blank">${link}</a>
+            <button class="btn-remove" onclick="removePassaporto(${index})">Rimuovi</button>`;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    renderPassaporti();
+  </script>
+</body>
+</html>
